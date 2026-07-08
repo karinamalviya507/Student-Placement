@@ -1,0 +1,285 @@
+{% load dict_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Result</title>
+<style>
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box;
+}
+body { 
+    font-family: 'Segoe UI', 
+    Arial, sans-serif;
+    background: #c8c9cb; 
+    min-height: 100vh;
+}
+
+.navbar {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    padding: 0 30px; height: 60px;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+}
+.nav-brand {
+    color: white; 
+    font-size: 18px; 
+    font-weight: 700; 
+    text-decoration: none; 
+}
+.nav-brand span { 
+    color: #e94560;
+}
+.nav-links { 
+    display: flex;
+     gap: 24px; 
+     align-items: center; 
+}
+.nav-links a { 
+    color: #a0b4cc; 
+    font-size: 14px; 
+    text-decoration: none;
+}
+.nav-links a:hover { 
+    color: white; 
+}
+.btn-logout {
+    background: rgba(233,69,96,0.2); 
+    color: #e94560;
+    padding: 6px 16px;
+    border-radius: 8px; 
+    font-size: 13px;
+    text-decoration: none;
+    border: 1px solid rgba(233,69,96,0.4);
+}
+
+.container { 
+    max-width: 860px;
+    margin: 40px auto;
+    padding: 0 20px; 
+}
+
+.result-hero {
+    border-radius: 20px; 
+    padding: 40px; 
+    text-align: center;
+    margin-bottom: 28px; 
+    color: white;
+}
+.result-hero.placed { 
+    background: linear-gradient(135deg, #11998e, #38ef7d); 
+}
+.result-hero.not-placed { 
+    background: linear-gradient(135deg, #e94560, #c73652); 
+}
+.result-icon { 
+    font-size: 60px; 
+    margin-bottom: 12px; 
+}
+.result-label { 
+    font-size: 14px; 
+    font-weight: 600; 
+    opacity: 0.85; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    margin-bottom: 8px; 
+}
+.result-main { 
+    font-size: 38px; 
+    font-weight: 800; 
+    margin-bottom: 8px; 
+}
+.result-sub { 
+    font-size: 15px; 
+    opacity: 0.85; 
+}
+.best-badge {
+    display: inline-block; margin-top: 16px;
+    background: rgba(255,255,255,0.25); 
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 6px 20px;
+    border-radius: 30px; 
+    font-size: 13px; 
+    font-weight: 600;
+}
+
+.section-title {
+    font-size: 13px; 
+    font-weight: 700; 
+    color: #555;
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    margin-bottom: 16px;
+}
+.algo-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 16px; 
+    margin-bottom: 28px; 
+}
+.algo-card {
+    background: white; 
+    border-radius: 14px; 
+    padding: 20px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.07);
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    border-left: 4px solid #e0e6f0;
+}
+.algo-card.placed-result { 
+    border-left-color: #11998e; 
+}
+.algo-card.notplaced-result { 
+    border-left-color: #e94560; 
+}
+.algo-name { 
+    font-size: 15px; 
+    font-weight: 700; 
+    color: #1a1a2e; 
+    margin-bottom: 4px; 
+}
+.algo-accuracy { 
+    font-size: 12px;
+    color: #888; 
+}
+.algo-pred {
+    font-size: 14px; 
+    font-weight: 700; 
+    padding: 6px 14px; 
+    border-radius: 20px;
+}
+.pred-placed { 
+    background: #e6f9f0; 
+    color: #11998e; 
+}
+.pred-notplaced { 
+    background: #ffeef1; 
+    color: #e94560; 
+}
+
+.summary-card {
+    background: white; 
+    border-radius: 18px; 
+    padding: 28px;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.07); 
+    margin-bottom: 28px;
+}
+.input-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 14px; margin-top: 14px; 
+}
+.input-item { 
+    text-align: center; 
+}
+.input-val { 
+    font-size: 17px; 
+    font-weight: 700; 
+    color: #1a1a2e; 
+}
+.input-key { 
+    font-size: 11px; 
+    color: #999; 
+    margin-top: 3px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.4px; 
+}
+
+.btn-back {
+    display: inline-block; 
+    margin-top: 4px;
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    color: white; 
+    text-decoration: none; 
+    border-radius: 12px;
+    padding: 14px 40px; 
+    font-size: 15px; 
+    font-weight: 600;
+}
+.btn-compare {
+    display: inline-block; 
+    margin-top: 4px; 
+    margin-left: 12px;
+    background: linear-gradient(135deg, #e94560, #c73652);
+    color: white; 
+    text-decoration: none; 
+    border-radius: 12px;
+    padding: 14px 32px; 
+    font-size: 15px; 
+    font-weight: 600;
+}
+.actions { 
+    text-align: center; 
+    margin-top: 8px; 
+    }
+
+</style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <a class="nav-brand" href="/home/">🎓 <span>Student Placement</span> Predictor</a>
+    <div class="nav-links">
+        <a href="/home/">Predict</a>
+        <a href="/compare/">Compare Models</a>
+        <a href="/logout/" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="result-hero {% if is_placed %}placed{% else %}not-placed{% endif %}">
+        <div class="result-icon">{% if is_placed %}🎉{% else %}📚{% endif %}</div>
+        <div class="result-label">Prediction Result</div>
+        <div class="result-main">{{ final_result }}</div>
+        <div class="result-sub">
+            {% if is_placed %}Congratulations! This student profile is likely to get placed.
+            {% else %}This student profile needs improvement. Focus on technical skills and projects.{% endif %}
+        </div>
+        <div class="best-badge">Best Model: {{ best_model }} ({{ best_confidence }}% confidence)</div>
+    </div>
+
+
+    <div class="section-title">🤖 Predictions by All 4 Algorithms</div>
+    <div class="algo-grid">
+        {% for name, pred in predictions.items %}
+        <div class="algo-card {% if 'Placed ✅' in pred %}placed-result{% else %}notplaced-result{% endif %}">
+            <div>
+                <div class="algo-name">{{ name }}</div>
+                <div class="algo-accuracy">Confidence: {{ confidences|get_item:name }}%</div>
+            </div>
+            <div class="algo-pred {% if 'Placed ✅' in pred %}pred-placed{% else %}pred-notplaced{% endif %}">
+                {{ pred }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="summary-card">
+        <div class="section-title">📋 Input Summary</div>
+        <div class="input-grid">
+            {% for key, val in input_data.items %}
+            <div class="input-item">
+                <div class="input-val">{{ val }}</div>
+                <div class="input-key">{{ key }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="/home/" class="btn-back">← Predict Again</a>
+        <a href="/compare/" class="btn-compare">📊 Compare Models</a>
+    </div>
+
+</div>
+</body>
+
+</html>
